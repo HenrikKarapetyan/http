@@ -64,17 +64,17 @@ final class UploadedFile implements UploadedFileInterface
     private bool $isMoved = false;
 
     /**
-     * @param StreamInterface|string|resource $streamOrFile
-     * @param int                             $size
-     * @param int                             $error
-     * @param string|null                     $clientFilename
-     * @param string|null                     $clientMediaType
+     * @param string|StreamInterface $streamOrFile
+     * @param int                    $size
+     * @param int                    $error
+     * @param string|null            $clientFilename
+     * @param string|null            $clientMediaType
      *
      * @psalm-suppress DocblockTypeContradiction
      * @psalm-suppress RedundantConditionGivenDocblockType
      */
     public function __construct(
-        $streamOrFile,
+        StreamInterface|string $streamOrFile,
         int $size,
         int $error,
         ?string $clientFilename = null,

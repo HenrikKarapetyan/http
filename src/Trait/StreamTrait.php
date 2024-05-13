@@ -312,7 +312,7 @@ trait StreamTrait
         if (!$this->isReadable()) {
             throw new RuntimeException('Stream is not readable.');
         }
-        $result = fread($this->resource, $length);
+        $result = fread($this->resource, max(1, $length));
 
         if ($result === false) {
             throw new RuntimeException('Error reading stream.');
@@ -347,7 +347,12 @@ trait StreamTrait
         });
 
         try {
-            return stream_get_contents($this->resource);
+            $contents = stream_get_contents($this->resource);
+            if (!$contents) {
+                throw new RuntimeException($message);
+            }
+
+            return $contents;
         } catch (Throwable $e) {
             throw $e === $exception ? $e : new RuntimeException("{$message}: {$e->getMessage()}", 0, $e);
         } finally {

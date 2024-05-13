@@ -13,10 +13,6 @@ trait ResponseTrait
     use MessageTrait;
 
     /**
-     * Map of standard HTTP status code and reason phrases.
-     *
-     * @see https://www.iana.org/assignments/http-status-codes/http-status-codes.xhtml
-     *
      * @var array<int, string>
      */
     private const PHRASES = [
@@ -169,7 +165,7 @@ trait ResponseTrait
      * @param int                                  $statusCode
      * @param string                               $reasonPhrase
      * @param StreamInterface|string|resource|null $body
-     * @param array                                $headers
+     * @param string[]                             $headers
      * @param string                               $protocol
      */
     private function init(

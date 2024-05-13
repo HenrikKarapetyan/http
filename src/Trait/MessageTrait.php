@@ -194,8 +194,6 @@ trait MessageTrait
      * @param string|string[] $value header value(s)
      *
      * @return MessageInterface
-     *
-     * @psalm-suppress MixedPropertyTypeCoercion
      */
     public function withHeader(string $name, $value): MessageInterface
     {
@@ -228,8 +226,6 @@ trait MessageTrait
      * @param string|string[] $value header value(s)
      *
      * @return MessageInterface
-     *
-     * @psalm-suppress MixedPropertyTypeCoercion
      */
     public function withAddedHeader(string $name, $value): MessageInterface
     {

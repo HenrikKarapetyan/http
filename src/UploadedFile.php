@@ -29,9 +29,9 @@ final class UploadedFile implements UploadedFileInterface
     ];
 
     /**
-     * @var StreamInterface|null
+     * @var StreamInterface
      */
-    private ?StreamInterface $stream = null;
+    private $stream;
 
     /**
      * @var string|null
@@ -64,29 +64,20 @@ final class UploadedFile implements UploadedFileInterface
     private bool $isMoved = false;
 
     /**
-     * @param string|StreamInterface $streamOrFile
-     * @param int                    $size
-     * @param int                    $error
-     * @param string|null            $clientFilename
-     * @param string|null            $clientMediaType
-     *
-     * @psalm-suppress DocblockTypeContradiction
-     * @psalm-suppress RedundantConditionGivenDocblockType
+     * @param string|StreamInterface|resource $streamOrFile
+     * @param int                             $size
+     * @param int                             $error
+     * @param string|null                     $clientFilename
+     * @param string|null                     $clientMediaType
      */
     public function __construct(
-        StreamInterface|string $streamOrFile,
+        $streamOrFile,
         int $size,
         int $error,
         ?string $clientFilename = null,
         ?string $clientMediaType = null
     ) {
-        if (!array_key_exists($error, self::ERRORS)) {
-            throw new InvalidArgumentException(sprintf(
-                '"%s" is not valid error status for "UploadedFile". It must be one of "UPLOAD_ERR_*" constants:  "%s".',
-                $error,
-                implode('", "', array_keys(self::ERRORS))
-            ));
-        }
+        $this->checkErrors($error);
 
         $this->size            = $size;
         $this->error           = $error;
@@ -96,35 +87,11 @@ final class UploadedFile implements UploadedFileInterface
         if ($error !== UPLOAD_ERR_OK) {
             return;
         }
-
-        if (is_string($streamOrFile)) {
-            $this->file = $streamOrFile;
-
-            return;
-        }
-
-        if (is_resource($streamOrFile)) {
-            $this->stream = new Stream($streamOrFile);
-
-            return;
-        }
-
-        if ($streamOrFile instanceof StreamInterface) {
-            $this->stream = $streamOrFile;
-
-            return;
-        }
-
-        throw new InvalidArgumentException(sprintf(
-            '"%s" is not valid stream or file provided for "UploadedFile".',
-            is_object($streamOrFile) ? get_class($streamOrFile) : gettype($streamOrFile)
-        ));
+        $this->init($streamOrFile);
     }
 
     /**
-     * {@inheritdoc}
-     *
-     * @psalm-suppress PossiblyNullArgument
+     * @return StreamInterface
      */
     public function getStream(): StreamInterface
     {
@@ -143,12 +110,7 @@ final class UploadedFile implements UploadedFileInterface
         return $this->stream;
     }
 
-    /**
-     * {@inheritdoc}
-     *
-     * @psalm-suppress NoValue, RedundantCondition, TypeDoesNotContainType
-     */
-    public function moveTo($targetPath): void
+    public function moveTo(string $targetPath): void
     {
         if ($this->error !== UPLOAD_ERR_OK) {
             throw new RuntimeException(self::ERRORS[$this->error]);
@@ -156,13 +118,6 @@ final class UploadedFile implements UploadedFileInterface
 
         if ($this->isMoved) {
             throw new RuntimeException('The file cannot be moved because it has already been moved.');
-        }
-
-        if (!is_string($targetPath)) {
-            throw new InvalidArgumentException(sprintf(
-                '"%s" is not valid target path for move. It must be a string type.',
-                is_object($targetPath) ? get_class($targetPath) : gettype($targetPath)
-            ));
         }
 
         if (empty($targetPath)) {
@@ -182,33 +137,21 @@ final class UploadedFile implements UploadedFileInterface
         $this->isMoved = true;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getSize(): ?int
     {
         return $this->size;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getError(): int
     {
         return $this->error;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getClientFilename(): ?string
     {
         return $this->clientFilename;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getClientMediaType(): ?string
     {
         return $this->clientMediaType;
@@ -219,13 +162,11 @@ final class UploadedFile implements UploadedFileInterface
      * files via is_uploaded_file() and move_uploaded_file() or writes If SAPI is not used.
      *
      * @param string $targetPath
-     *
-     * @psalm-suppress PossiblyNullReference
      */
     private function moveOrWriteFile(string $targetPath): void
     {
         if ($this->file !== null) {
-            $isCliEnv = (!PHP_SAPI || strpos(PHP_SAPI, 'cli') === 0 || strpos(PHP_SAPI, 'phpdbg') === 0);
+            $isCliEnv = (!PHP_SAPI || str_starts_with(PHP_SAPI, 'cli') || str_starts_with(PHP_SAPI, 'phpdbg'));
 
             if (!($isCliEnv ? rename($this->file, $targetPath) : move_uploaded_file($this->file, $targetPath))) {
                 throw new RuntimeException(sprintf('Uploaded file could not be moved to "%s".', $targetPath));
@@ -233,8 +174,8 @@ final class UploadedFile implements UploadedFileInterface
 
             return;
         }
-
-        if (!$file = fopen($targetPath, 'wb+')) {
+        $file = fopen($targetPath, 'wb+');
+        if (!$file) {
             throw new RuntimeException(sprintf('Unable to write to "%s".', $targetPath));
         }
 
@@ -245,5 +186,47 @@ final class UploadedFile implements UploadedFileInterface
         }
 
         fclose($file);
+    }
+
+    private function checkErrors(int $error): void
+    {
+        if (!array_key_exists($error, self::ERRORS)) {
+            throw new InvalidArgumentException(sprintf(
+                '"%s" is not valid error status for "UploadedFile". It must be one of "UPLOAD_ERR_*" constants:  "%s".',
+                $error,
+                implode('", "', array_keys(self::ERRORS))
+            ));
+        }
+
+    }
+
+    /**
+     * @param string|StreamInterface|resource $streamOrFile
+     *
+     * @return void
+     */
+    private function init($streamOrFile): void
+    {
+        switch ($streamOrFile) {
+            case is_string($streamOrFile):
+                $this->file = $streamOrFile;
+
+                break;
+            case is_resource($streamOrFile):
+                $this->stream = new Stream($streamOrFile);
+
+                break;
+            case $streamOrFile instanceof StreamInterface:
+                $this->stream = $streamOrFile;
+
+                break;
+
+            default: throw new InvalidArgumentException(sprintf(
+                '"%s" is not valid stream or file provided for "UploadedFile".',
+                is_object($streamOrFile) ? get_class($streamOrFile) : gettype($streamOrFile)
+            ));
+
+        }
+
     }
 }

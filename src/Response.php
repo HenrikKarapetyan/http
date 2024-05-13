@@ -9,7 +9,7 @@ use henrik\http\Trait\ResponseTrait;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
 
-final class Response implements ResponseInterface, StatusCodeInterface
+final class Response implements ResponseInterface
 {
     use ResponseTrait;
 
@@ -21,7 +21,7 @@ final class Response implements ResponseInterface, StatusCodeInterface
      * @param string                      $reasonPhrase
      */
     public function __construct(
-        int $statusCode = self::STATUS_OK,
+        int $statusCode = StatusCodeInterface::STATUS_OK,
         array $headers = [],
         null|StreamInterface|string $body = null,
         string $protocol = '1.1',

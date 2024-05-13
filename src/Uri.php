@@ -7,6 +7,9 @@ namespace henrik\http;
 use InvalidArgumentException;
 use Psr\Http\Message\UriInterface;
 
+/**
+ * @SuppressWarnings(PHPMD)
+ */
 final class Uri implements UriInterface
 {
     /**
@@ -135,12 +138,12 @@ final class Uri implements UriInterface
 
     /**
      * {@inheritDoc}
-     *
-     * @psalm-suppress PossiblyNullOperand
      */
     public function getAuthority(): string
     {
-        if (($authority = $this->host) === '') {
+        $authority = $this->host;
+
+        if ($authority === '') {
             return '';
         }
 
@@ -508,8 +511,6 @@ final class Uri implements UriInterface
      * @param string $pattern
      *
      * @return string
-     *
-     * @psalm-param non-empty-string $pattern
      */
     private function encode(string $string, string $pattern): string
     {

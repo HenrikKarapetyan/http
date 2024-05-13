@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace henrik\http\Trait;
 
+use Fig\Http\Message\StatusCodeInterface;
 use InvalidArgumentException;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
@@ -12,77 +13,70 @@ trait ResponseTrait
 {
     use MessageTrait;
 
-    /**
-     * @var array<int, string>
-     */
-    private const PHRASES = [
-        // Informational 1xx
-        self::STATUS_CONTINUE            => 'Continue',
-        self::STATUS_SWITCHING_PROTOCOLS => 'Switching Protocols',
-        self::STATUS_PROCESSING          => 'Processing',
-        self::STATUS_EARLY_HINTS         => 'Early Hints',
-        // Successful 2xx
-        self::STATUS_OK                            => 'OK',
-        self::STATUS_CREATED                       => 'Created',
-        self::STATUS_ACCEPTED                      => 'Accepted',
-        self::STATUS_NON_AUTHORITATIVE_INFORMATION => 'Non-Authoritative Information',
-        self::STATUS_NO_CONTENT                    => 'No Content',
-        self::STATUS_RESET_CONTENT                 => 'Reset Content',
-        self::STATUS_PARTIAL_CONTENT               => 'Partial Content',
-        self::STATUS_MULTI_STATUS                  => 'Multi-Status',
-        self::STATUS_ALREADY_REPORTED              => 'Already Reported',
-        self::STATUS_IM_USED                       => 'IM Used',
-        // Redirection 3xx
-        self::STATUS_MULTIPLE_CHOICES   => 'Multiple Choices',
-        self::STATUS_MOVED_PERMANENTLY  => 'Moved Permanently',
-        self::STATUS_FOUND              => 'Found',
-        self::STATUS_SEE_OTHER          => 'See Other',
-        self::STATUS_NOT_MODIFIED       => 'Not Modified',
-        self::STATUS_USE_PROXY          => 'Use Proxy',
-        self::STATUS_TEMPORARY_REDIRECT => 'Temporary Redirect',
-        self::STATUS_PERMANENT_REDIRECT => 'Permanent Redirect',
-        // Client Errors 4xx
-        self::STATUS_BAD_REQUEST                     => 'Bad Request',
-        self::STATUS_UNAUTHORIZED                    => 'Unauthorized',
-        self::STATUS_PAYMENT_REQUIRED                => 'Payment Required',
-        self::STATUS_FORBIDDEN                       => 'Forbidden',
-        self::STATUS_NOT_FOUND                       => 'Not Found',
-        self::STATUS_METHOD_NOT_ALLOWED              => 'Method Not Allowed',
-        self::STATUS_NOT_ACCEPTABLE                  => 'Not Acceptable',
-        self::STATUS_PROXY_AUTHENTICATION_REQUIRED   => 'Proxy Authentication Required',
-        self::STATUS_REQUEST_TIMEOUT                 => 'Request Timeout',
-        self::STATUS_CONFLICT                        => 'Conflict',
-        self::STATUS_GONE                            => 'Gone',
-        self::STATUS_LENGTH_REQUIRED                 => 'Length Required',
-        self::STATUS_PRECONDITION_FAILED             => 'Precondition Failed',
-        self::STATUS_PAYLOAD_TOO_LARGE               => 'Payload Too Large',
-        self::STATUS_URI_TOO_LONG                    => 'URI Too Long',
-        self::STATUS_UNSUPPORTED_MEDIA_TYPE          => 'Unsupported Media Type',
-        self::STATUS_RANGE_NOT_SATISFIABLE           => 'Range Not Satisfiable',
-        self::STATUS_EXPECTATION_FAILED              => 'Expectation Failed',
-        self::STATUS_IM_A_TEAPOT                     => 'I\'m a teapot',
-        self::STATUS_MISDIRECTED_REQUEST             => 'Misdirected Request',
-        self::STATUS_UNPROCESSABLE_ENTITY            => 'Unprocessable Entity',
-        self::STATUS_LOCKED                          => 'Locked',
-        self::STATUS_FAILED_DEPENDENCY               => 'Failed Dependency',
-        self::STATUS_TOO_EARLY                       => 'Too Early',
-        self::STATUS_UPGRADE_REQUIRED                => 'Upgrade Required',
-        self::STATUS_PRECONDITION_REQUIRED           => 'Precondition Required',
-        self::STATUS_TOO_MANY_REQUESTS               => 'Too Many Requests',
-        self::STATUS_REQUEST_HEADER_FIELDS_TOO_LARGE => 'Request Header Fields Too Large',
-        self::STATUS_UNAVAILABLE_FOR_LEGAL_REASONS   => 'Unavailable For Legal Reasons',
-        // Server Errors 5xx
-        self::STATUS_INTERNAL_SERVER_ERROR           => 'Internal Server Error',
-        self::STATUS_NOT_IMPLEMENTED                 => 'Not Implemented',
-        self::STATUS_BAD_GATEWAY                     => 'Bad Gateway',
-        self::STATUS_SERVICE_UNAVAILABLE             => 'Service Unavailable',
-        self::STATUS_GATEWAY_TIMEOUT                 => 'Gateway Timeout',
-        self::STATUS_VERSION_NOT_SUPPORTED           => 'HTTP Version Not Supported',
-        self::STATUS_VARIANT_ALSO_NEGOTIATES         => 'Variant Also Negotiates',
-        self::STATUS_INSUFFICIENT_STORAGE            => 'Insufficient Storage',
-        self::STATUS_LOOP_DETECTED                   => 'Loop Detected',
-        self::STATUS_NOT_EXTENDED                    => 'Not Extended',
-        self::STATUS_NETWORK_AUTHENTICATION_REQUIRED => 'Network Authentication Required',
+    private const RESPONSE_PHRASES = [
+        StatusCodeInterface::STATUS_CONTINUE                        => 'Continue',
+        StatusCodeInterface::STATUS_SWITCHING_PROTOCOLS             => 'Switching Protocols',
+        StatusCodeInterface::STATUS_PROCESSING                      => 'Processing',
+        StatusCodeInterface::STATUS_EARLY_HINTS                     => 'Early Hints',
+        StatusCodeInterface::STATUS_OK                              => 'OK',
+        StatusCodeInterface::STATUS_CREATED                         => 'Created',
+        StatusCodeInterface::STATUS_ACCEPTED                        => 'Accepted',
+        StatusCodeInterface::STATUS_NON_AUTHORITATIVE_INFORMATION   => 'Non-Authoritative Information',
+        StatusCodeInterface::STATUS_NO_CONTENT                      => 'No Content',
+        StatusCodeInterface::STATUS_RESET_CONTENT                   => 'Reset Content',
+        StatusCodeInterface::STATUS_PARTIAL_CONTENT                 => 'Partial Content',
+        StatusCodeInterface::STATUS_MULTI_STATUS                    => 'Multi-Status',
+        StatusCodeInterface::STATUS_ALREADY_REPORTED                => 'Already Reported',
+        StatusCodeInterface::STATUS_IM_USED                         => 'IM Used',
+        StatusCodeInterface::STATUS_MULTIPLE_CHOICES                => 'Multiple Choices',
+        StatusCodeInterface::STATUS_MOVED_PERMANENTLY               => 'Moved Permanently',
+        StatusCodeInterface::STATUS_FOUND                           => 'Found',
+        StatusCodeInterface::STATUS_SEE_OTHER                       => 'See Other',
+        StatusCodeInterface::STATUS_NOT_MODIFIED                    => 'Not Modified',
+        StatusCodeInterface::STATUS_USE_PROXY                       => 'Use Proxy',
+        StatusCodeInterface::STATUS_RESERVED                        => 'Status Reserved',
+        StatusCodeInterface::STATUS_TEMPORARY_REDIRECT              => 'Temporary Redirect',
+        StatusCodeInterface::STATUS_PERMANENT_REDIRECT              => 'Permanent Redirect',
+        StatusCodeInterface::STATUS_BAD_REQUEST                     => 'Bad Request',
+        StatusCodeInterface::STATUS_UNAUTHORIZED                    => 'Unauthorized',
+        StatusCodeInterface::STATUS_PAYMENT_REQUIRED                => 'Payment Required',
+        StatusCodeInterface::STATUS_FORBIDDEN                       => 'Forbidden',
+        StatusCodeInterface::STATUS_NOT_FOUND                       => 'Not Found',
+        StatusCodeInterface::STATUS_METHOD_NOT_ALLOWED              => 'Method Not Allowed',
+        StatusCodeInterface::STATUS_NOT_ACCEPTABLE                  => 'Not Acceptable',
+        StatusCodeInterface::STATUS_PROXY_AUTHENTICATION_REQUIRED   => 'Proxy Authentication Required',
+        StatusCodeInterface::STATUS_REQUEST_TIMEOUT                 => 'Request Timeout',
+        StatusCodeInterface::STATUS_CONFLICT                        => 'Conflict',
+        StatusCodeInterface::STATUS_GONE                            => 'Gone',
+        StatusCodeInterface::STATUS_LENGTH_REQUIRED                 => 'Length Required',
+        StatusCodeInterface::STATUS_PRECONDITION_FAILED             => 'Precondition Failed',
+        StatusCodeInterface::STATUS_PAYLOAD_TOO_LARGE               => 'Payload Too Large',
+        StatusCodeInterface::STATUS_URI_TOO_LONG                    => 'URI Too Long',
+        StatusCodeInterface::STATUS_UNSUPPORTED_MEDIA_TYPE          => 'Unsupported Media Type',
+        StatusCodeInterface::STATUS_RANGE_NOT_SATISFIABLE           => 'Range Not Satisfiable',
+        StatusCodeInterface::STATUS_EXPECTATION_FAILED              => 'Expectation Failed',
+        StatusCodeInterface::STATUS_IM_A_TEAPOT                     => 'I\'m a teapot',
+        StatusCodeInterface::STATUS_MISDIRECTED_REQUEST             => 'Misdirected Request',
+        StatusCodeInterface::STATUS_UNPROCESSABLE_ENTITY            => 'Unprocessable Entity',
+        StatusCodeInterface::STATUS_LOCKED                          => 'Locked',
+        StatusCodeInterface::STATUS_FAILED_DEPENDENCY               => 'Failed Dependency',
+        StatusCodeInterface::STATUS_TOO_EARLY                       => 'Too Early',
+        StatusCodeInterface::STATUS_UPGRADE_REQUIRED                => 'Upgrade Required',
+        StatusCodeInterface::STATUS_PRECONDITION_REQUIRED           => 'Precondition Required',
+        StatusCodeInterface::STATUS_TOO_MANY_REQUESTS               => 'Too Many Requests',
+        StatusCodeInterface::STATUS_REQUEST_HEADER_FIELDS_TOO_LARGE => 'Request Header Fields Too Large',
+        StatusCodeInterface::STATUS_UNAVAILABLE_FOR_LEGAL_REASONS   => 'Unavailable For Legal Reasons',
+        StatusCodeInterface::STATUS_INTERNAL_SERVER_ERROR           => 'Internal Server Error',
+        StatusCodeInterface::STATUS_NOT_IMPLEMENTED                 => 'Not Implemented',
+        StatusCodeInterface::STATUS_BAD_GATEWAY                     => 'Bad Gateway',
+        StatusCodeInterface::STATUS_SERVICE_UNAVAILABLE             => 'Service Unavailable',
+        StatusCodeInterface::STATUS_GATEWAY_TIMEOUT                 => 'Gateway Timeout',
+        StatusCodeInterface::STATUS_VERSION_NOT_SUPPORTED           => 'HTTP Version Not Supported',
+        StatusCodeInterface::STATUS_VARIANT_ALSO_NEGOTIATES         => 'Variant Also Negotiates',
+        StatusCodeInterface::STATUS_INSUFFICIENT_STORAGE            => 'Insufficient Storage',
+        StatusCodeInterface::STATUS_LOOP_DETECTED                   => 'Loop Detected',
+        StatusCodeInterface::STATUS_NOT_EXTENDED                    => 'Not Extended',
+        StatusCodeInterface::STATUS_NETWORK_AUTHENTICATION_REQUIRED => 'Network Authentication Required',
     ];
 
     /**
@@ -128,11 +122,6 @@ trait ResponseTrait
      *                             use the defaults as suggested in the HTTP specification
      *
      * @return ResponseInterface
-     *
-     * @psalm-suppress DocblockTypeContradiction
-     * @psalm-suppress TypeDoesNotContainType
-     * @psalm-suppress RedundantCondition
-     * @psalm-suppress NoValue
      */
     public function withStatus(int $code, string $reasonPhrase = ''): ResponseInterface
     {
@@ -199,6 +188,6 @@ trait ResponseTrait
         }
 
         $this->statusCode   = $statusCode;
-        $this->reasonPhrase = $reasonPhrase ?: (self::PHRASES[$statusCode] ?? '');
+        $this->reasonPhrase = $reasonPhrase ?: (self::RESPONSE_PHRASES[$statusCode] ?? '');
     }
 }

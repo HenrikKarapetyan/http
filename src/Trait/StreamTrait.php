@@ -104,8 +104,6 @@ trait StreamTrait
      * Get the size of the stream if known.
      *
      * @return int|null returns the size in bytes if known, or null if unknown
-     *
-     * @psalm-suppress RedundantCast
      */
     public function getSize(): ?int
     {
@@ -214,11 +212,9 @@ trait StreamTrait
     }
 
     /**
-     * Returns whether or not the stream is writable.
+     * Returns or not the stream is writable.
      *
      * @return bool
-     *
-     * @psalm-suppress MixedAssignment
      */
     public function isWritable(): bool
     {
@@ -271,11 +267,9 @@ trait StreamTrait
     }
 
     /**
-     * Returns whether or not the stream is readable.
+     * Returns or not the stream is readable.
      *
      * @return bool
-     *
-     * @psalm-suppress MixedAssignment
      */
     public function isReadable(): bool
     {
@@ -394,8 +388,8 @@ trait StreamTrait
      *
      * Called when creating `Psr\Http\Message\StreamInterface` instance.
      *
-     * @param string|resource $stream string stream target or stream resource
-     * @param string          $mode   resource mode for stream target
+     * @param string|resource|null $stream string stream target or stream resource
+     * @param string               $mode   resource mode for stream target
      *
      * @throws InvalidArgumentException if the stream or resource is invalid
      * @throws RuntimeException         if the stream or file cannot be opened

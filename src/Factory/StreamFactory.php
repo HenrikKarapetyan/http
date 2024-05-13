@@ -33,8 +33,6 @@ final class StreamFactory implements StreamFactoryInterface
 
     /**
      * {@inheritdoc}
-     *
-     * @psalm-suppress DocblockTypeContradiction
      */
     public function createStreamFromResource($resource): StreamInterface
     {

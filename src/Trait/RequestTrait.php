@@ -123,8 +123,6 @@ trait RequestTrait
      * @param string $method case-sensitive method
      *
      * @return RequestInterface
-     *
-     * @psalm-suppress DocblockTypeContradiction
      */
     public function withMethod(string $method): RequestInterface
     {

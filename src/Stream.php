@@ -12,8 +12,8 @@ final class Stream implements StreamInterface
     use StreamTrait;
 
     /**
-     * @param string|resource $stream
-     * @param string          $mode
+     * @param string|resource|null $stream
+     * @param string               $mode
      */
     public function __construct($stream = 'php://temp', string $mode = 'wb+')
     {

@@ -1,13 +1,15 @@
 {
-  "name": "hk/http",
+  "name": "henrik/http",
   "type": "library",
+  "license": "GPL-2.0-only",
+  "description": "Service Locator",
+  "minimum-stability": "dev",
   "require": {
     "php": ">=8.2",
     "psr/http-message": "2.0.x-dev",
     "fig/http-message-util": "^1.1@dev",
     "psr/http-factory": "^1.1"
   },
-  "license": "MIT",
   "autoload": {
     "psr-4": {
       "henrik\\http\\": "src/"
@@ -19,7 +21,6 @@
       "email": "henrikkarapetyan@gmail.tech"
     }
   ],
-  "minimum-stability": "dev",
   "require-dev": {
     "phpmd/phpmd": "^2.15",
     "friendsofphp/php-cs-fixer": "dev-master",

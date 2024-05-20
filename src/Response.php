@@ -9,7 +9,7 @@ use henrik\http\Trait\ResponseTrait;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
 
-final class Response implements ResponseInterface
+class Response implements ResponseInterface
 {
     use ResponseTrait;
 

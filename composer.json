@@ -8,11 +8,13 @@
     "php": ">=8.2",
     "psr/http-message": "2.0.x-dev",
     "fig/http-message-util": "^1.1@dev",
-    "psr/http-factory": "^1.1"
+    "psr/http-factory": "^1.1",
+    "henrik/contracts": "dev-main",
+    "henrik/session": "dev-master"
   },
   "autoload": {
     "psr-4": {
-      "henrik\\http\\": "src/"
+      "Henrik\\Http\\": "src/"
     }
   },
   "authors": [
@@ -23,9 +25,8 @@
   ],
   "require-dev": {
     "phpmd/phpmd": "^2.15",
-    "friendsofphp/php-cs-fixer": "dev-master",
-    "phpstan/phpstan": "2.0.x-dev",
-    "henrik/service-locator": "dev-master"
+    "friendsofphp/php-cs-fixer": "v3.57.2",
+    "phpstan/phpstan": "2.0.x-dev"
   },
   "scripts": {
     "phpstan": [

@@ -18,19 +18,6 @@ use InvalidArgumentException;
 use Locale;
 use LogicException;
 
-/**
- * Request represents an HTTP request.
- *
- * The methods dealing with URL accept / return a raw path (% encoded):
- *   * getBasePath
- *   * getBaseUrl
- *   * getPathInfo
- *   * getRequestUri
- *   * getUri
- *   * getUriForPath
- *
- * @author Fabien Potencier <fabien@symfony.com>
- */
 class Request
 {
     public const HEADER_FORWARDED          = 0b000001; // When using RFC 7239
@@ -1016,7 +1003,7 @@ class Request
         }
 
         $targetDirs[] = $targetFile;
-        $path         = Request . phpstr_repeat('../', \count($sourceDirs)) . implode('/', $targetDirs);
+        $path         = str_repeat('../', \count($sourceDirs)) . implode('/', $targetDirs);
 
         // A reference to the same base directory or an empty subdirectory must be prefixed with "./".
         // This also applies to a segment with a colon character (e.g., "file:colon") that cannot be used

@@ -6,6 +6,8 @@
   "minimum-stability": "dev",
   "require": {
     "php": ">=8.2",
+    "ext-intl": "*",
+
     "psr/http-message": "2.0.x-dev",
     "fig/http-message-util": "^1.1@dev",
     "psr/http-factory": "^1.1",

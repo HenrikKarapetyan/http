@@ -6,6 +6,7 @@ use ArrayIterator;
 use BackedEnum;
 use Closure;
 use Countable;
+use Henrik\Contracts\Http\ParameterBagInterface;
 use Henrik\Http\Exception\BadRequestException;
 use Henrik\Http\Exception\UnexpectedValueException;
 use InvalidArgumentException;
@@ -21,7 +22,7 @@ use ValueError;
  *
  * @implements \IteratorAggregate<string, mixed>
  */
-class ParameterBag implements IteratorAggregate, Countable
+class ParameterBag implements IteratorAggregate, Countable, ParameterBagInterface
 {
     protected array $parameters;
 

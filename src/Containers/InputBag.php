@@ -4,6 +4,7 @@ namespace Henrik\Http\Containers;
 
 use BackedEnum;
 use Closure;
+use Henrik\Contracts\Http\InputBagInterface;
 use Henrik\Http\Exception\BadRequestException;
 use Henrik\Http\Exception\UnexpectedValueException;
 use InvalidArgumentException;
@@ -14,7 +15,7 @@ use Stringable;
  *
  * @author Saif Eddin Gmati <azjezz@protonmail.com>
  */
-final class InputBag extends ParameterBag
+final class InputBag extends ParameterBag implements InputBagInterface
 {
     /**
      * Returns a scalar input value by name.

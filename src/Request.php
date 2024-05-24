@@ -4,6 +4,7 @@ namespace Henrik\Http\Request;
 
 use Closure;
 use Exception;
+use Henrik\Contracts\Http\RequestInterface;
 use Henrik\Contracts\Session\SessionInterface;
 use Henrik\Http\Containers\FileBag;
 use Henrik\Http\Containers\HeaderBag;
@@ -14,58 +15,13 @@ use Henrik\Http\Exception\ConflictingHeadersException;
 use Henrik\Http\Exception\JsonException;
 use Henrik\Http\Exception\SessionNotFoundException;
 use Henrik\Http\Exception\SuspiciousOperationException;
+use Henrik\Http\HeaderUtils;
 use InvalidArgumentException;
 use Locale;
 use LogicException;
 
-class Request
+class Request implements RequestInterface
 {
-    public const HEADER_FORWARDED          = 0b000001; // When using RFC 7239
-    public const HEADER_X_FORWARDED_FOR    = 0b000010;
-    public const HEADER_X_FORWARDED_HOST   = 0b000100;
-    public const HEADER_X_FORWARDED_PROTO  = 0b001000;
-    public const HEADER_X_FORWARDED_PORT   = 0b010000;
-    public const HEADER_X_FORWARDED_PREFIX = 0b100000;
-
-    public const HEADER_X_FORWARDED_AWS_ELB = 0b0011010; // AWS ELB doesn't send X-Forwarded-Host
-    public const HEADER_X_FORWARDED_TRAEFIK = 0b0111110; // All "X-Forwarded-*" headers sent by Traefik reverse proxy
-
-    public const METHOD_HEAD    = 'HEAD';
-    public const METHOD_GET     = 'GET';
-    public const METHOD_POST    = 'POST';
-    public const METHOD_PUT     = 'PUT';
-    public const METHOD_PATCH   = 'PATCH';
-    public const METHOD_DELETE  = 'DELETE';
-    public const METHOD_PURGE   = 'PURGE';
-    public const METHOD_OPTIONS = 'OPTIONS';
-    public const METHOD_TRACE   = 'TRACE';
-    public const METHOD_CONNECT = 'CONNECT';
-
-    private const FORWARDED_PARAMS = [
-        self::HEADER_X_FORWARDED_FOR   => 'for',
-        self::HEADER_X_FORWARDED_HOST  => 'host',
-        self::HEADER_X_FORWARDED_PROTO => 'proto',
-        self::HEADER_X_FORWARDED_PORT  => 'host',
-    ];
-
-    /**
-     * Names for headers that can be trusted when
-     * using trusted proxies.
-     *
-     * The FORWARDED header is the standard as of rfc7239.
-     *
-     * The other headers are non-standard, but widely used
-     * by popular reverse proxies (like Apache mod_proxy or Amazon EC2).
-     */
-    private const TRUSTED_HEADERS = [
-        self::HEADER_FORWARDED          => 'FORWARDED',
-        self::HEADER_X_FORWARDED_FOR    => 'X_FORWARDED_FOR',
-        self::HEADER_X_FORWARDED_HOST   => 'X_FORWARDED_HOST',
-        self::HEADER_X_FORWARDED_PROTO  => 'X_FORWARDED_PROTO',
-        self::HEADER_X_FORWARDED_PORT   => 'X_FORWARDED_PORT',
-        self::HEADER_X_FORWARDED_PREFIX => 'X_FORWARDED_PREFIX',
-    ];
-
     /**
      * Custom parameters.
      */
@@ -733,7 +689,7 @@ class Request
             return [$ip];
         }
 
-        return $this->getTrustedValues(self::HEADER_X_FORWARDED_FOR, $ip) ?: [$ip];
+        return $this->getTrustedValues(RequestInterface::HEADER_X_FORWARDED_FOR, $ip) ?: [$ip];
     }
 
     /**
@@ -818,7 +774,7 @@ class Request
         $trustedPrefix = '';
 
         // the proxy prefix must be prepended to any prefix being needed at the webserver level
-        if ($this->isFromTrustedProxy() && $trustedPrefixValues = $this->getTrustedValues(self::HEADER_X_FORWARDED_PREFIX)) {
+        if ($this->isFromTrustedProxy() && $trustedPrefixValues = $this->getTrustedValues(RequestInterface::HEADER_X_FORWARDED_PREFIX)) {
             $trustedPrefix = rtrim($trustedPrefixValues[0], '/');
         }
 
@@ -845,9 +801,9 @@ class Request
      */
     public function getPort(): null|int|string
     {
-        if ($this->isFromTrustedProxy() && $host = $this->getTrustedValues(self::HEADER_X_FORWARDED_PORT)) {
+        if ($this->isFromTrustedProxy() && $host = $this->getTrustedValues(RequestInterface::HEADER_X_FORWARDED_PORT)) {
             $host = $host[0];
-        } elseif ($this->isFromTrustedProxy() && $host = $this->getTrustedValues(self::HEADER_X_FORWARDED_HOST)) {
+        } elseif ($this->isFromTrustedProxy() && $host = $this->getTrustedValues(RequestInterface::HEADER_X_FORWARDED_HOST)) {
             $host = $host[0];
         } elseif (!$host = $this->headers->get('HOST')) {
             return $this->server->get('SERVER_PORT');
@@ -1037,7 +993,7 @@ class Request
      */
     public function isSecure(): bool
     {
-        if ($this->isFromTrustedProxy() && $proto = $this->getTrustedValues(self::HEADER_X_FORWARDED_PROTO)) {
+        if ($this->isFromTrustedProxy() && $proto = $this->getTrustedValues(RequestInterface::HEADER_X_FORWARDED_PROTO)) {
             return \in_array(strtolower($proto[0]), ['https', 'on', 'ssl', '1'], true);
         }
 
@@ -1058,7 +1014,7 @@ class Request
      */
     public function getHost(): string
     {
-        if ($this->isFromTrustedProxy() && $host = $this->getTrustedValues(self::HEADER_X_FORWARDED_HOST)) {
+        if ($this->isFromTrustedProxy() && $host = $this->getTrustedValues(RequestInterface::HEADER_X_FORWARDED_HOST)) {
             $host = $host[0];
         } elseif (!$host = $this->headers->get('HOST')) {
             if (!$host = $this->server->get('SERVER_NAME')) {
@@ -1432,7 +1388,9 @@ class Request
             return clone $this->request;
         }
 
-        if ('' === $content = $this->getContent()) {
+        $content = $this->getContent();
+
+        if ($content === '') {
             return new InputBag([]);
         }
 
@@ -1934,8 +1892,8 @@ class Request
      */
     private function getTrustedValues(int $type, ?string $ip = null): array
     {
-        $cacheKey = $type . "\0" . ((self::$trustedHeaderSet & $type) ? $this->headers->get(self::TRUSTED_HEADERS[$type]) : '');
-        $cacheKey .= "\0" . $ip . "\0" . $this->headers->get(self::TRUSTED_HEADERS[self::HEADER_FORWARDED]);
+        $cacheKey = $type . "\0" . ((self::$trustedHeaderSet & $type) ? $this->headers->get(RequestInterface::TRUSTED_HEADERS[$type]) : '');
+        $cacheKey .= "\0" . $ip . "\0" . $this->headers->get(RequestInterface::TRUSTED_HEADERS[RequestInterface::HEADER_FORWARDED]);
 
         if (isset($this->trustedValuesCache[$cacheKey])) {
             return $this->trustedValuesCache[$cacheKey];
@@ -1944,21 +1902,21 @@ class Request
         $clientValues    = [];
         $forwardedValues = [];
 
-        if ((self::$trustedHeaderSet & $type) && $this->headers->has(self::TRUSTED_HEADERS[$type])) {
-            foreach (explode(',', $this->headers->get(self::TRUSTED_HEADERS[$type])) as $v) {
-                $clientValues[] = ($type === self::HEADER_X_FORWARDED_PORT ? '0.0.0.0:' : '') . trim($v);
+        if ((self::$trustedHeaderSet & $type) && $this->headers->has(RequestInterface::TRUSTED_HEADERS[$type])) {
+            foreach (explode(',', $this->headers->get(RequestInterface::TRUSTED_HEADERS[$type])) as $v) {
+                $clientValues[] = ($type === RequestInterface::HEADER_X_FORWARDED_PORT ? '0.0.0.0:' : '') . trim($v);
             }
         }
 
-        if ((self::$trustedHeaderSet & self::HEADER_FORWARDED) && (isset(self::FORWARDED_PARAMS[$type])) && $this->headers->has(self::TRUSTED_HEADERS[self::HEADER_FORWARDED])) {
-            $forwarded = $this->headers->get(self::TRUSTED_HEADERS[self::HEADER_FORWARDED]);
+        if ((self::$trustedHeaderSet & RequestInterface::HEADER_FORWARDED) && (isset(RequestInterface::FORWARDED_PARAMS[$type])) && $this->headers->has(RequestInterface::TRUSTED_HEADERS[RequestInterface::HEADER_FORWARDED])) {
+            $forwarded = $this->headers->get(RequestInterface::TRUSTED_HEADERS[RequestInterface::HEADER_FORWARDED]);
             $parts     = HeaderUtils::split($forwarded, ',;=');
-            $param     = self::FORWARDED_PARAMS[$type];
+            $param     = RequestInterface::FORWARDED_PARAMS[$type];
             foreach ($parts as $subParts) {
                 if (null === $v = HeaderUtils::combine($subParts)[$param] ?? null) {
                     continue;
                 }
-                if ($type === self::HEADER_X_FORWARDED_PORT) {
+                if ($type === RequestInterface::HEADER_X_FORWARDED_PORT) {
                     if (str_ends_with($v, ']') || false === $v = strrchr($v, ':')) {
                         $v = $this->isSecure() ? ':443' : ':80';
                     }
@@ -1986,7 +1944,7 @@ class Request
         }
         $this->isForwardedValid = false;
 
-        throw new ConflictingHeadersException(sprintf('The request has both a trusted "%s" header and a trusted "%s" header, conflicting with each other. You should either configure your proxy to remove one of them, or configure your project to distrust the offending one.', self::TRUSTED_HEADERS[self::HEADER_FORWARDED], self::TRUSTED_HEADERS[$type]));
+        throw new ConflictingHeadersException(sprintf('The request has both a trusted "%s" header and a trusted "%s" header, conflicting with each other. You should either configure your proxy to remove one of them, or configure your project to distrust the offending one.', RequestInterface::TRUSTED_HEADERS[RequestInterface::HEADER_FORWARDED], RequestInterface::TRUSTED_HEADERS[$type]));
     }
 
     private function normalizeAndFilterClientIps(array $clientIps, string $ip): array

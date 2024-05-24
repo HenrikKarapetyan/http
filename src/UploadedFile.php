@@ -1,5 +1,5 @@
 <?php
 
-namespace Henrik\Http\Request;
+namespace Henrik\Http;
 
 class UploadedFile {}

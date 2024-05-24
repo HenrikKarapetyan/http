@@ -1,6 +1,6 @@
 <?php
 
-namespace Henrik\Http\Request;
+namespace Henrik\Http;
 
 use Closure;
 use Exception;
@@ -15,7 +15,6 @@ use Henrik\Http\Exception\ConflictingHeadersException;
 use Henrik\Http\Exception\JsonException;
 use Henrik\Http\Exception\SessionNotFoundException;
 use Henrik\Http\Exception\SuspiciousOperationException;
-use Henrik\Http\HeaderUtils;
 use InvalidArgumentException;
 use Locale;
 use LogicException;

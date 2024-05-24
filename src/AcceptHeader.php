@@ -1,6 +1,6 @@
 <?php
 
-namespace Henrik\Http\Request;
+namespace Henrik\Http;
 
 /**
  * Represents an Accept-* header.
